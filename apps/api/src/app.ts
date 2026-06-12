@@ -6,8 +6,11 @@ import { logger } from "./logger.js";
 import { requireApiKey, requireJwt } from "./middleware/auth.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 import { apiLimiter, authLimiter } from "./middleware/rate-limit.js";
+import { apiKeysRouter } from "./routes/api-keys.js";
 import { authRouter } from "./routes/auth.js";
+import { checkoutRouter } from "./routes/checkout.js";
 import { meRouter } from "./routes/me.js";
+import { paymentsRouter } from "./routes/payments.js";
 import { v1Router } from "./routes/v1.js";
 
 export function createApp(): Express {
@@ -26,10 +29,13 @@ export function createApp(): Express {
 
   // Dashboard resources — JWT required. Scoped under /dashboard so the guard
   // never leaks onto /v1 or unmatched routes.
-  app.use("/dashboard", requireJwt, meRouter);
+  app.use("/dashboard", requireJwt, meRouter, apiKeysRouter);
+
+  // Public hosted checkout (customer-facing, reached via the payment link).
+  app.use("/checkout", checkoutRouter);
 
   // Programmatic API — API key required + general rate limit.
-  app.use("/v1", apiLimiter, requireApiKey, v1Router);
+  app.use("/v1", apiLimiter, requireApiKey, v1Router, paymentsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
