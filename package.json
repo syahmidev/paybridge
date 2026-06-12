@@ -16,6 +16,6 @@
     "test": "pnpm -r test"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "prisma", "@prisma/engines", "esbuild", "bcrypt"]
+    "onlyBuiltDependencies": ["@prisma/client", "prisma", "@prisma/engines", "esbuild", "bcrypt", "sharp", "unrs-resolver"]
   }
 }

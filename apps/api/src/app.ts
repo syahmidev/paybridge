@@ -9,6 +9,7 @@ import { apiLimiter, authLimiter } from "./middleware/rate-limit.js";
 import { apiKeysRouter } from "./routes/api-keys.js";
 import { authRouter } from "./routes/auth.js";
 import { checkoutRouter } from "./routes/checkout.js";
+import { dashboardPaymentsRouter } from "./routes/dashboard-payments.js";
 import { meRouter } from "./routes/me.js";
 import { paymentsRouter } from "./routes/payments.js";
 import { v1Router } from "./routes/v1.js";
@@ -29,7 +30,7 @@ export function createApp(): Express {
 
   // Dashboard resources — JWT required. Scoped under /dashboard so the guard
   // never leaks onto /v1 or unmatched routes.
-  app.use("/dashboard", requireJwt, meRouter, apiKeysRouter);
+  app.use("/dashboard", requireJwt, meRouter, apiKeysRouter, dashboardPaymentsRouter);
 
   // Public hosted checkout (customer-facing, reached via the payment link).
   app.use("/checkout", checkoutRouter);
