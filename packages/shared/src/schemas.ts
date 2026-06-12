@@ -42,3 +42,21 @@ export const checkoutDecisionSchema = z.object({
   outcome: z.enum(["succeed", "fail"]),
 });
 export type CheckoutDecisionInput = z.infer<typeof checkoutDecisionSchema>;
+
+// --- Webhook endpoints (dashboard) ---
+
+export const createWebhookEndpointSchema = z.object({
+  url: z.string().url("Enter a valid https URL"),
+  enabled: z.boolean().default(true),
+});
+export type CreateWebhookEndpointInput = z.infer<
+  typeof createWebhookEndpointSchema
+>;
+
+export const updateWebhookEndpointSchema = z.object({
+  url: z.string().url().optional(),
+  enabled: z.boolean().optional(),
+});
+export type UpdateWebhookEndpointInput = z.infer<
+  typeof updateWebhookEndpointSchema
+>;

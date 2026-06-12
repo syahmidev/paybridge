@@ -1,8 +1,8 @@
+import type { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import { ApiError } from "../errors.js";
 
-// Phase 1: in-memory limiter. Phase 2 hardens this to per-API-key (Redis).
-const handler = (_req: unknown, res: import("express").Response) => {
+const handler = (_req: Request, res: Response) => {
   res
     .status(429)
     .json(
@@ -10,16 +10,19 @@ const handler = (_req: unknown, res: import("express").Response) => {
     );
 };
 
-// Generous default for the programmatic API.
-export const apiLimiter = rateLimit({
+// Per-API-key limiter for /v1. Runs after requireApiKey, so each merchant's key
+// gets its own bucket (falling back to IP if somehow unauthenticated).
+// In-memory for the sandbox; a production deployment would back this with Redis.
+export const apiKeyLimiter = rateLimit({
   windowMs: 60_000,
   limit: 100,
   standardHeaders: "draft-7",
   legacyHeaders: false,
+  keyGenerator: (req: Request) => req.apiKeyId ?? req.ip ?? "unknown",
   handler,
 });
 
-// Tighter limit to slow credential stuffing on auth endpoints.
+// Tighter limit to slow credential stuffing on auth endpoints (keyed by IP).
 export const authLimiter = rateLimit({
   windowMs: 15 * 60_000,
   limit: 20,

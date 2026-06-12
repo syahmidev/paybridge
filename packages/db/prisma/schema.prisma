@@ -25,6 +25,12 @@ enum PaymentStatus {
   canceled
 }
 
+enum WebhookDeliveryStatus {
+  pending
+  succeeded
+  failed
+}
+
 model Merchant {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -33,8 +39,9 @@ model Merchant {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  apiKeys  ApiKey[]
-  payments Payment[]
+  apiKeys          ApiKey[]
+  payments         Payment[]
+  webhookEndpoints WebhookEndpoint[]
 
   @@map("merchants")
 }
@@ -77,4 +84,43 @@ model Payment {
   @@unique([merchantId, idempotencyKey])
   @@index([merchantId])
   @@map("payments")
+}
+
+model WebhookEndpoint {
+  id String @id @default(cuid())
+  merchantId String
+  url String
+  // Per-endpoint HMAC signing secret (whsec_...). Displayable so the merchant
+  // can verify signatures; not a credential for calling our API.
+  signingSecret String
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  merchant   Merchant          @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([merchantId])
+  @@map("webhook_endpoints")
+}
+
+model WebhookDelivery {
+  id String @id @default(cuid())
+  endpointId String
+  // Event identity (shared across endpoints for the same event), e.g. evt_...
+  eventId String
+  eventType String
+  payload Json
+  status WebhookDeliveryStatus @default(pending)
+  attempts Int @default(0)
+  responseStatus Int?
+  error String?
+  lastAttemptAt DateTime?
+  nextRetryAt DateTime?
+  createdAt DateTime @default(now())
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId])
+  @@index([status])
+  @@map("webhook_deliveries")
 }

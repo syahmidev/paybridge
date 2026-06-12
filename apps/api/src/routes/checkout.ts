@@ -5,6 +5,7 @@ import { ApiError } from "../errors.js";
 import { asyncHandler } from "../lib/async-handler.js";
 import { assertTransition, isTerminal } from "../payments/state-machine.js";
 import { serializePayment } from "../payments/serialize.js";
+import { emitPaymentEvent } from "../webhooks/delivery.js";
 
 // Public hosted-checkout endpoints. No merchant auth — the customer reaches these
 // via the payment link. The (cuid) payment id is the unguessable capability.
@@ -64,6 +65,15 @@ checkoutRouter.post(
       where: { id: payment.id },
       data: { status: target },
     });
+
+    // Notify subscribed webhook endpoints. Fire-and-forget — the checkout
+    // response must not wait on (or fail because of) webhook delivery.
+    const eventType =
+      target === PaymentStatus.succeeded
+        ? "payment.succeeded"
+        : "payment.failed";
+    void emitPaymentEvent(updated, eventType);
+
     res.json(serializePayment(updated));
   }),
 );
