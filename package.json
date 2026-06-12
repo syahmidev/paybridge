@@ -1,0 +1,21 @@
+{
+  "name": "paybridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Developer Payment Gateway Sandbox",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:api": "pnpm --filter @paybridge/api dev",
+    "dev:web": "pnpm --filter @paybridge/web dev",
+    "build": "pnpm -r build",
+    "db:generate": "pnpm --filter @paybridge/db generate",
+    "db:migrate": "pnpm --filter @paybridge/db migrate",
+    "db:seed": "pnpm --filter @paybridge/db seed",
+    "test": "pnpm -r test"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "prisma", "@prisma/engines", "esbuild", "bcrypt"]
+  }
+}

@@ -1,0 +1,80 @@
+// PayBridge — Prisma schema
+// Phase 1 models: Merchant, ApiKey, Payment.
+// Phase 2 will add WebhookEndpoint + WebhookDelivery.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ApiKeyType {
+  secret
+  publishable
+}
+
+// Stripe-style payment lifecycle. Transitions are enforced in the API layer.
+enum PaymentStatus {
+  requires_payment_method
+  processing
+  succeeded
+  failed
+  canceled
+}
+
+model Merchant {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  apiKeys  ApiKey[]
+  payments Payment[]
+
+  @@map("merchants")
+}
+
+model ApiKey {
+  id         String     @id @default(cuid())
+  merchantId String
+  type       ApiKeyType
+  // Secret keys are stored hashed; the plaintext is shown once on creation.
+  // Publishable keys are not secret and may be stored/displayed in full.
+  keyHash    String     @unique
+  // Short display prefix, e.g. "sk_test_a1b2" — safe to show in lists.
+  prefix     String
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime   @default(now())
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@index([merchantId])
+  @@map("api_keys")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  merchantId  String
+  // Amount in integer minor units (e.g. cents). Never a float.
+  amount      Int
+  currency    String        @db.VarChar(3)
+  status      PaymentStatus @default(requires_payment_method)
+  description String?
+  metadata    Json?
+  // Idempotency-Key from POST /v1/payments; unique per merchant.
+  idempotencyKey String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@unique([merchantId, idempotencyKey])
+  @@index([merchantId])
+  @@map("payments")
+}
