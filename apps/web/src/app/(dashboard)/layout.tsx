@@ -11,6 +11,7 @@ const NAV = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/payments", label: "Payments" },
   { href: "/dashboard/api-keys", label: "API keys" },
+  { href: "/dashboard/webhooks", label: "Webhooks" },
 ];
 
 export default function DashboardLayout({

@@ -47,3 +47,27 @@ export interface AuthResponse {
   token: string;
   merchant: Merchant;
 }
+
+export interface WebhookEndpoint {
+  id: string;
+  url: string;
+  signingSecret: string;
+  enabled: boolean;
+  createdAt: string;
+}
+
+export type WebhookDeliveryStatus = "pending" | "succeeded" | "failed";
+
+export interface WebhookDelivery {
+  id: string;
+  eventId: string;
+  eventType: string;
+  status: WebhookDeliveryStatus;
+  attempts: number;
+  responseStatus: number | null;
+  error: string | null;
+  lastAttemptAt: string | null;
+  nextRetryAt: string | null;
+  createdAt: string;
+  endpoint: { url: string };
+}

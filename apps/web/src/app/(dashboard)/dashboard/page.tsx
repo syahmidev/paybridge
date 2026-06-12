@@ -86,6 +86,20 @@ export default function OverviewPage() {
           >
             Create payment
           </Button>
+          <Button
+            render={
+              <a
+                href={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/docs`}
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+            nativeButton={false}
+            variant="outline"
+            size="sm"
+          >
+            API docs
+          </Button>
         </CardContent>
       </Card>
     </div>
