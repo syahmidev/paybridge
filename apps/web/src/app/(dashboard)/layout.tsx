@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -72,6 +73,7 @@ export default function DashboardLayout({
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {merchant.email}
             </span>
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={logout}>
               Sign out
             </Button>

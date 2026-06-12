@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
+    <main className="relative flex flex-1 flex-col items-center justify-center px-6 py-24 text-center">
+      <div className="absolute right-6 top-6">
+        <ThemeToggle />
+      </div>
       <span className="mb-4 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
         Sandbox · test mode only
       </span>
