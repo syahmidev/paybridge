@@ -10,8 +10,11 @@ process.env.JWT_SECRET = process.env.JWT_SECRET ?? "test-secret-at-least-16-char
 
 const { prisma } = await import("@paybridge/db");
 
-// Clean slate before each test. Deleting merchants cascades to keys + payments.
+// Clean slate before each test. Deleting merchants cascades to keys, payments,
+// and webhook endpoints/deliveries, but clear children first to be explicit.
 beforeEach(async () => {
+  await prisma.webhookDelivery.deleteMany();
+  await prisma.webhookEndpoint.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.apiKey.deleteMany();
   await prisma.merchant.deleteMany();
