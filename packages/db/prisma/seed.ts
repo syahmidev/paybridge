@@ -40,33 +40,56 @@ async function main() {
     ],
   });
 
-  // A few sample payments across statuses.
+  // Generate a spread of payments across the last 30 days so the analytics
+  // charts have realistic, varied data.
   await prisma.payment.deleteMany({ where: { merchantId: merchant.id } });
-  await prisma.payment.createMany({
-    data: [
-      {
+
+  const descriptions = [
+    "Pro plan — monthly",
+    "Add-on credits",
+    "Annual upgrade",
+    "Seat — additional",
+    "One-time setup",
+    "Team plan — monthly",
+  ];
+  const amounts = [1500, 2990, 4990, 9900, 1999, 12000];
+
+  // Deterministic pseudo-random so seeds are reproducible.
+  let s = 42;
+  const rand = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return s / 0x7fffffff;
+  };
+  const pick = <T>(arr: T[]) => arr[Math.floor(rand() * arr.length)];
+
+  const samples = [];
+  for (let day = 29; day >= 0; day--) {
+    const perDay = Math.floor(rand() * 5); // 0–4 payments per day
+    for (let i = 0; i < perDay; i++) {
+      const roll = rand();
+      const status =
+        roll < 0.65
+          ? PaymentStatus.succeeded
+          : roll < 0.82
+            ? PaymentStatus.failed
+            : roll < 0.92
+              ? PaymentStatus.requires_payment_method
+              : PaymentStatus.canceled;
+      const createdAt = new Date();
+      createdAt.setUTCDate(createdAt.getUTCDate() - day);
+      createdAt.setUTCHours(Math.floor(rand() * 24), Math.floor(rand() * 60), 0, 0);
+      samples.push({
         merchantId: merchant.id,
-        amount: 4990,
-        currency: "MYR",
-        status: PaymentStatus.succeeded,
-        description: "Pro plan — monthly",
-      },
-      {
-        merchantId: merchant.id,
-        amount: 1500,
-        currency: "MYR",
-        status: PaymentStatus.requires_payment_method,
-        description: "Add-on credits",
-      },
-      {
-        merchantId: merchant.id,
-        amount: 9900,
-        currency: "USD",
-        status: PaymentStatus.failed,
-        description: "Annual upgrade",
-      },
-    ],
-  });
+        amount: pick(amounts),
+        currency: rand() < 0.85 ? "MYR" : "USD",
+        status,
+        description: pick(descriptions),
+        createdAt,
+      });
+    }
+  }
+  await prisma.payment.createMany({ data: samples });
+  console.log(`  Seeded ${samples.length} payments across 30 days.`);
 
   console.log("Seed complete.");
   console.log(`  Merchant login: ${email} / ${password}`);

@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type {
+  Analytics,
   ApiKey,
   CreatedApiKey,
   Payment,
@@ -66,6 +67,15 @@ export function useCreatePayment() {
     mutationFn: (body: CreatePaymentBody) =>
       api<Payment>("/dashboard/payments", { method: "POST", body }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["payments"] }),
+  });
+}
+
+// --- Analytics ---
+
+export function useAnalytics() {
+  return useQuery({
+    queryKey: ["analytics"],
+    queryFn: () => api<Analytics>("/dashboard/analytics"),
   });
 }
 

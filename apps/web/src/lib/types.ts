@@ -58,6 +58,19 @@ export interface WebhookEndpoint {
 
 export type WebhookDeliveryStatus = "pending" | "succeeded" | "failed";
 
+export interface Analytics {
+  summary: {
+    totalPayments: number;
+    succeeded: number;
+    failed: number;
+    successRate: number;
+    volume: { currency: string; amount: number }[];
+  };
+  statusBreakdown: { status: PaymentStatus; count: number }[];
+  primaryCurrency: string;
+  timeSeries: { date: string; count: number; succeeded: number; volume: number }[];
+}
+
 export interface WebhookDelivery {
   id: string;
   eventId: string;

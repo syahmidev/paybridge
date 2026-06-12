@@ -8,6 +8,7 @@ import { openapiSpec } from "./openapi.js";
 import { requireApiKey, requireJwt } from "./middleware/auth.js";
 import { errorHandler, notFoundHandler } from "./middleware/error.js";
 import { apiKeyLimiter, authLimiter } from "./middleware/rate-limit.js";
+import { analyticsRouter } from "./routes/analytics.js";
 import { apiKeysRouter } from "./routes/api-keys.js";
 import { authRouter } from "./routes/auth.js";
 import { checkoutRouter } from "./routes/checkout.js";
@@ -48,6 +49,7 @@ export function createApp(): Express {
     apiKeysRouter,
     dashboardPaymentsRouter,
     webhooksRouter,
+    analyticsRouter,
   );
 
   // Public hosted checkout (customer-facing, reached via the payment link).
